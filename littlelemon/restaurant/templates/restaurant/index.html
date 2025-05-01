@@ -1,0 +1,29 @@
+{% extends 'restaurant/base.html' %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Welcome to Saffron & Sage</h1>
+    <p class="lead">Experience the finest Mediterranean cuisine in town.</p>
+    <hr class="my-4">
+    <p>Book a table and enjoy our delicious dishes in a cozy atmosphere.</p>
+    <a class="btn btn-primary btn-lg" href="/book/" role="button">Book a Table</a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <h2>Our Menu</h2>
+        <p>Discover our wide selection of Mediterranean dishes, prepared with the finest ingredients.</p>
+        <a class="btn btn-secondary" href="/menu/" role="button">View Menu</a>
+    </div>
+    <div class="col-md-4">
+        <h2>About Us</h2>
+        <p>Learn about our story and our passion for Mediterranean cuisine.</p>
+        <a class="btn btn-secondary" href="/about/" role="button">About Us</a>
+    </div>
+    <div class="col-md-4">
+        <h2>Book a Table</h2>
+        <p>Reserve your table online and enjoy a seamless dining experience.</p>
+        <a class="btn btn-secondary" href="/book/" role="button">Book Now</a>
+    </div>
+</div>
+{% endblock %} 

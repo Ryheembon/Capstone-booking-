@@ -1,0 +1,113 @@
+{% extends 'restaurant/base.html' %}
+
+{% block content %}
+<div class="booking-form">
+    <h2>Book a Table at Saffron & Sage</h2>
+    <form id="bookingForm">
+        <div class="form-group">
+            <label for="first_name">First Name</label>
+            <input type="text" class="form-control" id="first_name" required>
+        </div>
+        <div class="form-group">
+            <label for="reservation_date">Reservation Date</label>
+            <input type="date" class="form-control" id="reservation_date" required>
+        </div>
+        <div class="form-group">
+            <label for="reservation_slot">Reservation Time</label>
+            <select class="form-control" id="reservation_slot" required>
+                <option value="">Select a time</option>
+                {% for hour in "123456789"|make_list %}
+                    <option value="{{ hour }}">{{ hour }}:00 PM</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Book Now</button>
+    </form>
+
+    <div id="bookingsList" class="mt-4">
+        <h3>Current Bookings</h3>
+        <div id="bookings"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('bookingForm');
+        const dateInput = document.getElementById('reservation_date');
+        const timeSelect = document.getElementById('reservation_slot');
+        const bookingsDiv = document.getElementById('bookings');
+
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.value = today;
+        dateInput.min = today;
+
+        // Function to fetch and display bookings
+        function fetchBookings(date) {
+            fetch(`/bookings/?date=${date}`)
+                .then(response => response.json())
+                .then(bookings => {
+                    bookingsDiv.innerHTML = bookings.length ? 
+                        bookings.map(booking => `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h5 class="card-title">${booking.first_name}</h5>
+                                    <p class="card-text">Time: ${booking.reservation_slot}:00 PM</p>
+                                </div>
+                            </div>
+                        `).join('') :
+                        '<p>No bookings for this date</p>';
+                    
+                    // Disable booked time slots
+                    const bookedSlots = bookings.map(b => b.reservation_slot);
+                    Array.from(timeSelect.options).forEach(option => {
+                        if (option.value) {
+                            option.disabled = bookedSlots.includes(parseInt(option.value));
+                            option.style.color = option.disabled ? '#ccc' : '#000';
+                        }
+                    });
+                });
+        }
+
+        // Fetch bookings when date changes
+        dateInput.addEventListener('change', function() {
+            fetchBookings(this.value);
+        });
+
+        // Handle form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const bookingData = {
+                first_name: document.getElementById('first_name').value,
+                reservation_date: dateInput.value,
+                reservation_slot: parseInt(timeSelect.value)
+            };
+
+            fetch('/bookings/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(bookingData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Booking successful!');
+                    fetchBookings(dateInput.value);
+                    form.reset();
+                    dateInput.value = today;
+                } else {
+                    alert('Booking failed: ' + data.error);
+                }
+            });
+        });
+
+        // Initial fetch of bookings
+        fetchBookings(today);
+    });
+</script>
+{% endblock %} 
